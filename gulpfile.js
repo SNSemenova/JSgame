@@ -1,61 +1,72 @@
-var gulp = require('gulp');
-var nunjucks = require('gulp-nunjucks');
-var concat = require('gulp-concat');
-var browserSync = require('browser-sync').create();
-//var imagemin = require('gulp-imagemin');
-//var pngquant = require('imagemin-pngquant');
-var reload = browserSync.reload;
-var cssmin = require('gulp-cssmin');
-const autoprefixer = require('gulp-autoprefixer');
+const { src, dest, watch, series, parallel } = require("gulp");
+const nunjucks = require("gulp-nunjucks");
+const concat = require("gulp-concat");
+const browserSync = require("browser-sync").create();
+const cleanCSS = require("gulp-clean-css");
+const autoprefixer = require("gulp-autoprefixer");
 
-var path = {
-    css:  'src/styles/*.css',    
-    html: 'src/templates/*.html',
-    js: 'src/scripts/*.js',
-    dist: {
-      css:  'dist/styles/',
-      html: 'dist/',     
-      js: 'dist/scripts/'
-    }
+const path = {
+  css: "src/styles/*.css",
+  html: "src/templates/*.html",
+  js: "src/scripts/*.js",
+  dist: {
+    css: "dist/styles/",
+    html: "dist/",
+    js: "dist/scripts/",
+  },
 };
 
-gulp.task('default', ['build', 'serve', 'watch']);
+// CSS task
+function cssTask() {
+  return src(path.css)
+    .pipe(
+      autoprefixer({
+        overrideBrowserslist: ["last 4 versions"],
+        cascade: false,
+      })
+    )
+    .pipe(cleanCSS())
+    .pipe(concat("style.css"))
+    .pipe(dest(path.dist.css));
+}
 
-gulp.task('css', function () {
-  return gulp.src(path.css)
-    .pipe(autoprefixer({
-      browsers: ['last 4 versions']
-    }))
-    .pipe(cssmin())
-    .pipe(concat('style.css'))  
-    .pipe(gulp.dest(path.dist.css));
-});
+// HTML task
+function htmlTask() {
+  return src(path.html).pipe(nunjucks.compile()).pipe(dest(path.dist.html));
+}
 
-gulp.task('html', function () {
-  return gulp.src(path.html)
-    .pipe(nunjucks.compile())
-    .pipe(gulp.dest(path.dist.html));
-});
+// JS task
+function jsTask() {
+  return src(path.js).pipe(concat("scripts.js")).pipe(dest(path.dist.js));
+}
 
-gulp.task('js', function () {
-  return gulp.src(path.js)
-    .pipe(concat('scripts.js'))
-    .pipe(gulp.dest(path.dist.js));
-});
+// Watch task
+function watchTask() {
+  watch(path.css, cssTask);
+  watch(path.html, htmlTask);
+  watch(path.js, jsTask);
+}
 
-gulp.task('build', ['html', 'css', 'js']);
-
-gulp.task('watch', function () {
-  gulp.watch(path.css, ['css']);
-  gulp.watch(path.html, ['html']);  
-  gulp.watch(path.js, ['js']);
-});
-
-gulp.task('serve', ['watch'], function() {
+// Serve task with live reload
+function serveTask(done) {
   browserSync.init({
     server: {
-      baseDir: path.dist.html
-    }
+      baseDir: path.dist.html,
+    },
   });
-  gulp.watch('dist/**').on('change', browserSync.reload);
-});
+
+  watch("dist/**").on("change", browserSync.reload);
+  done();
+}
+
+// Build task
+const build = parallel(htmlTask, cssTask, jsTask);
+
+// Экспорт задач
+exports.css = cssTask;
+exports.html = htmlTask;
+exports.js = jsTask;
+exports.watch = watchTask;
+exports.serve = series(watchTask, serveTask);
+exports.build = build;
+exports.default = series(build, watchTask, serveTask);
