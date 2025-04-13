@@ -4,13 +4,14 @@
   "description": "",
   "main": "gulpfile.js",
   "dependencies": {
+    "gulp": "^4.0.0",
     "nunjucks": "^3.0.0"
   },
   "devDependencies": {
     "browser-sync": "^2.18.8",
     "gulp-autoprefixer": "^3.1.1",
+    "gulp-clean-css": "^4.3.0",
     "gulp-concat": "^2.6.1",
-    "gulp-cssmin": "^0.1.7",
     "gulp-nunjucks": "^3.0.0"
   },
   "scripts": {
