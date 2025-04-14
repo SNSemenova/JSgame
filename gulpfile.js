@@ -69,4 +69,4 @@ exports.js = jsTask;
 exports.watch = watchTask;
 exports.serve = series(watchTask, serveTask);
 exports.build = build;
-exports.default = series(build, watchTask, serveTask);
+exports.default = series(build, parallel(watchTask, serveTask));
