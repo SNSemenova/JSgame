@@ -27,7 +27,7 @@ The game will open in your browser at: http://localhost:3000
 
 ## 🕹️ Game Description
 
-Buttons appear randomly on the screen. Your goal is to click them before they disappear. The more you manage to click in time — the higher your score!
+Buttons appear randomly on the screen. Your goal is to click them before they disappear. You win if you last the entire allotted time.
 
 ## 📦 Tech Stack
 
